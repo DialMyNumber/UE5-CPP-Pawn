@@ -1,4 +1,8 @@
 # External assets (Fab) - re-download required, not included in repo
+/Content/__ExternalActors__/
+/Content/__ExternalObjects__
+/Content/Survival_Character/
+
 
 # Visual Studio 2022 user specific files
 .vs/

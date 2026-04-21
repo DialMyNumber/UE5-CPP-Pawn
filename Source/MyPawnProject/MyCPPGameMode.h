@@ -8,5 +8,7 @@ UCLASS()
 class MYPAWNPROJECT_API AMyCPPGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+
+public:
+	AMyCPPGameMode();
 };

@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MyInventory.h"
+#include "MyPawnTitle.h"
 #include "MyCPPCharacter.generated.h"
 
 class USpringArmComponent;
@@ -24,6 +26,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	FMyInventory PlayerInventory;
+
+	FMyPawnTitle PlayerTitle;
 
 public:	
 	virtual void Tick(float DeltaTime) override;

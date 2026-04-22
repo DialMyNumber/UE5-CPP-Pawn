@@ -1,4 +1,4 @@
-#include "MyCPPCharacter.h"
+ï»¿#include "MyCPPCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
@@ -8,20 +8,51 @@ AMyCPPCharacter::AMyCPPCharacter()
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->SetupAttachment(RootComponent);
-	SpringArmComp->TargetArmLength = 400.f; // SpringArm ±âº» °Å¸® 
+	SpringArmComp->TargetArmLength = 400.f; // SpringArm ê¸°ë³¸ ê±°ë¦¬ 
 	SpringArmComp->bUsePawnControlRotation = true;
-	// PawnÀ» ÄÁÆ®·Ñ ÇÒ ¶§ SpringArmµµ °°ÀÌ ÀÌµ¿
+	// Pawnì„ ì»¨íŠ¸ë¡¤ í•  ë•Œ SpringArmë„ ê°™ì´ ì´ë™
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
-	// USpringArmComponent::SocketName ÀÌ¶ó°í Á¤ÀÇµÇ¾î ÀÖ´Â ³¡ºÎºĞ¿¡ ºÎÂø
+	// USpringArmComponent::SocketName ì´ë¼ê³  ì •ì˜ë˜ì–´ ìˆëŠ” ëë¶€ë¶„ì— ë¶€ì°©
 	CameraComp->bUsePawnControlRotation = false;	
-	// Ä«¸Ş¶ó ÀÚÃ¼´Â ¿òÁ÷ÀÌÁö ¾Ê°í SpringArm¿¡ °íÁ¤µÇ¾î ÀÖµµ·Ï ºñÈ°¼ºÈ­
+	// ì¹´ë©”ë¼ ìì²´ëŠ” ì›€ì§ì´ì§€ ì•Šê³  SpringArmì— ê³ ì •ë˜ì–´ ìˆë„ë¡ ë¹„í™œì„±í™”
 }
 
 void AMyCPPCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	PlayerInventory.AddItem("Wood Sword");
+	PlayerInventory.AddItem("Iron Sword");
+	PlayerInventory.AddItem("Healing Potion");
+	PlayerInventory.AddItem("Iron Helmet");
+	PlayerInventory.AddItem("Healing Potion");
+	PlayerInventory.AddItem("Long Bow");
+
+	UE_LOG(LogTemp, Log, TEXT("%s's Inventory Array List"), *GetName());
+	PlayerInventory.ShowInventoryArr();
+
+	UE_LOG(LogTemp, Log, TEXT("%s's Inventory Map List"), *GetName());
+	PlayerInventory.ShowInventoryMap();
+
+	PlayerTitle.AddTitle(TEXT("10ì‚´ì— ê³°ì„ ì¡ì€"));
+	PlayerTitle.AddTitle(TEXT("ì—¬ì‹ ì„ êµ¬ì¶œí•œ"));
+
+	UE_LOG(LogTemp, Log, TEXT("%s's Title List"), *GetName());
+	PlayerTitle.PrintAllTitles();
+	
+	if(PlayerTitle.isAchieved(TEXT("10ì‚´ì— ê³°ì„ ì¡ì€"))) {
+		UE_LOG(LogTemp, Log, TEXT("Wood Sword ì¥ì°© ê°€ëŠ¥"));
+	}
+
+	if (PlayerTitle.isAchieved(TEXT("ì—¬ì‹ ì„ êµ¬ì¶œí•œ"))) {
+		UE_LOG(LogTemp, Log, TEXT("Iron Sword ì¥ì°© ê°€ëŠ¥"));
+	}
+
+	if (PlayerTitle.isAchieved(TEXT("ì†œì”¨ì¢‹ì€"))) {
+		UE_LOG(LogTemp, Log, TEXT("Long Bow ì¥ì°© ê°€ëŠ¥"));
+	}
 }
 
 void AMyCPPCharacter::Tick(float DeltaTime)

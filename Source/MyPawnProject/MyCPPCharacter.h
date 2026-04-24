@@ -8,6 +8,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+struct FInputActionValue;
 
 UCLASS()
 class MYPAWNPROJECT_API AMyCPPCharacter : public ACharacter
@@ -24,6 +25,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 
+private:
+	float NormalSpeed;
+	float SprintSpeedMultiplier;
+	float SprintSpeed;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -33,8 +39,23 @@ protected:
 	FMyPawnTitle PlayerTitle;
 
 public:	
-	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION()
+	void Move(const FInputActionValue& value);
+
+	UFUNCTION()
+	void StartJump(const FInputActionValue& value);
+
+	UFUNCTION()
+	void StopJump(const FInputActionValue& value);
+
+	UFUNCTION()
+	void Look(const FInputActionValue& value);
+
+	UFUNCTION()
+	void StartSprint(const FInputActionValue& value);
+
+	UFUNCTION()
+	void StopSprint(const FInputActionValue& value);
 };

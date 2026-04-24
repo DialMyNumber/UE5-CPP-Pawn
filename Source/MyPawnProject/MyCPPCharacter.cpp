@@ -1,6 +1,9 @@
 ﻿#include "MyCPPCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "EnhancedInputComponent.h"
+#include "MyPlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AMyCPPCharacter::AMyCPPCharacter()
 {
@@ -17,6 +20,13 @@ AMyCPPCharacter::AMyCPPCharacter()
 	// USpringArmComponent::SocketName 이라고 정의되어 있는 끝부분에 부착
 	CameraComp->bUsePawnControlRotation = false;	
 	// 카메라 자체는 움직이지 않고 SpringArm에 고정되어 있도록 비활성화
+
+	NormalSpeed = 600.0f;
+	SprintSpeedMultiplier = 1.5f;
+	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
+
+	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+	// 현재 Character의 MaxWalkSpeed 를 NormalSpeed로 설정
 }
 
 void AMyCPPCharacter::BeginPlay()
@@ -55,12 +65,128 @@ void AMyCPPCharacter::BeginPlay()
 	}
 }
 
-void AMyCPPCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void AMyCPPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController()))
+		{
+			if (PlayerController->MoveAction)	// nullptr 인지 확인 후
+			{
+				EnhancedInput->BindAction(
+					PlayerController->MoveAction,	// 만들었던 IA MoveAction 에
+					ETriggerEvent::Triggered,	// Key가 눌려서 Event가 발생했을때
+					this,	// 현재 Character 객체의
+					&AMyCPPCharacter::Move	// Move 함수를 IA MoveAction 에 바인딩
+				);
+			}
+
+			if (PlayerController->JumpAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->JumpAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AMyCPPCharacter::StartJump
+				);
+
+				EnhancedInput->BindAction(
+					PlayerController->JumpAction,
+					ETriggerEvent::Completed,
+					this,
+					&AMyCPPCharacter::StopJump
+				);
+			}
+
+			if (PlayerController->LookAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->LookAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AMyCPPCharacter::Look
+				);
+			}
+
+			if (PlayerController->SprintAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->SprintAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AMyCPPCharacter::StartSprint
+				);
+
+				EnhancedInput->BindAction(
+					PlayerController->SprintAction,
+					ETriggerEvent::Completed,
+					this,
+					&AMyCPPCharacter::StopSprint
+				);
+			}
+		}
+	}
+}
+
+void AMyCPPCharacter::Move(const FInputActionValue& value)	// Axis2D = 2D Vector
+{
+	if (!Controller) return;	// Controller가 실제로 유효한지 확인하는 방어 코드
+
+	const FVector2D MoveInput = value.Get<FVector2D>();
+
+	if (!FMath::IsNearlyZero(MoveInput.X))	// 부동 소수점 관련해서는 IsNearlyZero를 붙이는게 좋음
+	{
+		AddMovementInput(GetActorForwardVector(), MoveInput.X);	
+		// Character 클래스는 이런 AddMovementInput 같은 함수들이 제공됨
+	}
+
+	if (!FMath::IsNearlyZero(MoveInput.Y))
+	{
+		AddMovementInput(GetActorRightVector(), MoveInput.Y);
+	}
+}
+
+void AMyCPPCharacter::StartJump(const FInputActionValue& value)
+{
+	if (value.Get<bool>())
+	{	// 함수 내부에 이미 Controller 체크 코드가 있음
+		Jump();	// Character 클래스에서 이미 구현되어 있는 기능
+	}
+}
+
+void AMyCPPCharacter::StopJump(const FInputActionValue& value)
+{
+	if (value.Get<bool>())
+	{	// 함수 내부에 이미 Controller 체크 코드가 있음
+		StopJumping();	// Character 클래스에서 이미 구현되어 있는 기능
+	}
+}
+
+void AMyCPPCharacter::Look(const FInputActionValue& value)
+{
+	FVector2D LookInput = value.Get<FVector2D>();
+
+	AddControllerYawInput(LookInput.X); // Character 클래스에서 이미 구현되어 있는 기능
+	// Yaw는 좌우 회전
+
+	AddControllerPitchInput(LookInput.Y); // Character 클래스에서 이미 구현되어 있는 기능
+	// Pitch는 상하 회전
+}
+
+void AMyCPPCharacter::StartSprint(const FInputActionValue& value)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	}
+}
+
+void AMyCPPCharacter::StopSprint(const FInputActionValue& value)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+	}
 }

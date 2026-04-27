@@ -28,8 +28,15 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	float MoveSpeed;
-	float VerticalSpeed;
+	FVector Velocity;
+
+	float MoveAccel;
+	float VerticalAccel;
+	float Drag;
+	float MaxSpeed;
+
+	float YawSpeed;
+	float CurrentYawInput;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -44,5 +51,8 @@ public:
 
 	UFUNCTION()
 	void PYaw(const FInputActionValue& value);
+
+	UFUNCTION()
+	void PLook(const FInputActionValue& value);
 
 };

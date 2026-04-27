@@ -31,11 +31,11 @@ AMyPawn::AMyPawn()
 	Velocity = FVector::ZeroVector;
 
 	MoveAccel = 500.f;
-	VerticalAccel = 400.f;
-	Drag = 0.55f;
-	MaxSpeed = 2000.f;
+	VerticalAccel = 50.f;
+	Drag = 0.95f;
+	MaxSpeed = 1000.f;
 
-	YawSpeed = 30.f;
+	YawSpeed = 15.f;
 	CurrentYawInput = 0.f;
 }
 
@@ -49,14 +49,14 @@ void AMyPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 속도 제한
-	Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
+	Velocity = Velocity.GetClampedToMaxSize(MaxSpeed); // 최대 속도 제한
+	Velocity.Z -= VerticalAccel * 10.0f * DeltaTime; // Z축으로 약간씩 내려감 (= 중력 느낌)
+	float DecelerationFactor = FMath::Exp(-DeltaTime / 10.0f); // 3초에 걸쳐 서서히 감속
+	Velocity *= DecelerationFactor;
 
-	// 이동
 	AddActorWorldOffset(Velocity * DeltaTime, true);
 
-	// 감속 (공기 저항 느낌)
-	Velocity *= Drag;
+	Velocity *= Drag; // 감속 (= 공기 저항 느낌)
 }
 
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

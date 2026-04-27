@@ -16,7 +16,7 @@ class MYPAWNPROJECT_API AMyPawn : public APawn
 public:
 	AMyPawn();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* StaticMeshComp; // Static Mesh ÄÄÆ÷³ÍÆ®
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -28,11 +28,21 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-
+	float MoveSpeed;
+	float VerticalSpeed;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION()
+	void PMove(const FInputActionValue& value);
+
+	UFUNCTION()
+	void PUpDown(const FInputActionValue& value);
+
+	UFUNCTION()
+	void PYaw(const FInputActionValue& value);
 
 };

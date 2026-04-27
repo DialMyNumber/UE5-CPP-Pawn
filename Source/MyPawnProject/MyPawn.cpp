@@ -2,6 +2,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
+#include "MyPawnController.h"
 
 AMyPawn::AMyPawn()
 {
@@ -26,6 +27,8 @@ AMyPawn::AMyPawn()
 	CameraComp->bUsePawnControlRotation = false;
 	// 카메라 자체는 움직이지 않고 SpringArm에 고정되어 있도록 비활성화
 
+	MoveSpeed = 1000.f;
+	VerticalSpeed = 500.f;
 }
 
 void AMyPawn::BeginPlay()
@@ -44,5 +47,76 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		if (AMyPawnController* PlayerController = Cast<AMyPawnController>(GetController()))
+		{
+			if (PlayerController->MoveAction)	// nullptr 인지 확인 후
+			{
+				EnhancedInput->BindAction(
+					PlayerController->MoveAction,	// 만들었던 IA MoveAction 에
+					ETriggerEvent::Triggered,	// Key가 눌려서 Event가 발생했을때
+					this,	// 현재 객체의
+					&AMyPawn::PMove	// PMove 함수를 IA MoveAction 에 바인딩
+				);
+			}
+
+
+			if (PlayerController->AltitudeAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->AltitudeAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AMyPawn::PUpDown
+				);
+			}
+
+			if (PlayerController->YawAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->YawAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AMyPawn::PYaw
+				);
+			}
+
+			UE_LOG(LogTemp, Warning, TEXT("Controller: %s"), *GetNameSafe(GetController()));
+
+		}
+	}
 }
 
+void AMyPawn::PMove(const FInputActionValue& value)
+{
+	FVector2D Input = value.Get<FVector2D>();
+
+	if (!Input.IsNearlyZero())
+	{
+		FVector MoveDir = FVector(Input.X, Input.Y, 0.f);
+		AddActorLocalOffset(MoveDir * MoveSpeed * GetWorld()->DeltaTimeSeconds, true);
+	}
+}
+
+void AMyPawn::PUpDown(const FInputActionValue& value)
+{
+	const float Input = value.Get<float>();
+
+	if (!FMath::IsNearlyZero(Input))
+	{
+		FVector Move = GetActorUpVector() * Input;
+
+		AddActorWorldOffset(Move * VerticalSpeed * GetWorld()->GetDeltaSeconds(), true);
+	}
+}
+
+void AMyPawn::PYaw(const FInputActionValue& value)
+{
+	const float Input = value.Get<float>();
+
+	if (!FMath::IsNearlyZero(Input))
+	{
+		AddActorLocalRotation(FRotator(0.f, Input * 0.2f, 0.f));
+	}
+}

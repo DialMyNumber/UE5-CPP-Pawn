@@ -23,4 +23,6 @@ public:
 	UInputAction* AltitudeAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* YawAction;
+
+	virtual void BeginPlay() override;
 };

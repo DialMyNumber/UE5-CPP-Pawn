@@ -7,6 +7,12 @@ AMyPawnController::AMyPawnController()
 	AltitudeAction(nullptr),
 	YawAction(nullptr)
 {
+}
+
+void AMyPawnController::BeginPlay()
+{
+	Super::BeginPlay();
+
 	// LocalPlayer = 현재 플레이어의 객체
 	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
 	{

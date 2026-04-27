@@ -1,5 +1,6 @@
 # External assets (Fab) - re-download required, not included in repo
 /Content/Resources/
+/Content/Fab/
 
 # Visual Studio 2022 user specific files
 .vs/

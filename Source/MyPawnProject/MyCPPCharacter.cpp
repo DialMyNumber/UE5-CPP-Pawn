@@ -9,6 +9,12 @@ AMyCPPCharacter::AMyCPPCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->SetupAttachment(RootComponent);
 	SpringArmComp->TargetArmLength = 400.f; // SpringArm 기본 거리 
@@ -18,7 +24,7 @@ AMyCPPCharacter::AMyCPPCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	// USpringArmComponent::SocketName 이라고 정의되어 있는 끝부분에 부착
-	CameraComp->bUsePawnControlRotation = false;	
+	CameraComp->bUsePawnControlRotation = false;
 	// 카메라 자체는 움직이지 않고 SpringArm에 고정되어 있도록 비활성화
 
 	NormalSpeed = 600.0f;
@@ -132,19 +138,27 @@ void AMyCPPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 void AMyCPPCharacter::Move(const FInputActionValue& value)	// Axis2D = 2D Vector
 {
-	if (!Controller) return;	// Controller가 실제로 유효한지 확인하는 방어 코드
+	if (!Controller) return;
 
 	const FVector2D MoveInput = value.Get<FVector2D>();
 
-	if (!FMath::IsNearlyZero(MoveInput.X))	// 부동 소수점 관련해서는 IsNearlyZero를 붙이는게 좋음
+	FRotator ControlRot = Controller->GetControlRotation();
+
+	FRotator YawRot(0.f, ControlRot.Yaw, 0.f); // Pitch는 제거하고 Yaw만 사용
+
+	FVector Forward = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+	FVector Right = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
+
+	// 부동 소수점 관련해서는 IsNearlyZero를 붙이는게 좋음
+	if (!FMath::IsNearlyZero(MoveInput.X))
 	{
-		AddMovementInput(GetActorForwardVector(), MoveInput.X);	
+		AddMovementInput(Forward, MoveInput.X);
 		// Character 클래스는 이런 AddMovementInput 같은 함수들이 제공됨
 	}
 
 	if (!FMath::IsNearlyZero(MoveInput.Y))
 	{
-		AddMovementInput(GetActorRightVector(), MoveInput.Y);
+		AddMovementInput(Right, MoveInput.Y);
 	}
 }
 

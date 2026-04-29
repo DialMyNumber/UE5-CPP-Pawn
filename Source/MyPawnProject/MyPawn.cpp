@@ -51,7 +51,7 @@ void AMyPawn::Tick(float DeltaTime)
 
 	Velocity = Velocity.GetClampedToMaxSize(MaxSpeed); // 최대 속도 제한
 	Velocity.Z -= VerticalAccel * 10.0f * DeltaTime; // Z축으로 약간씩 내려감 (= 중력 느낌)
-	float DecelerationFactor = FMath::Exp(-DeltaTime / 10.0f); // 3초에 걸쳐 서서히 감속
+	float DecelerationFactor = FMath::Exp(-DeltaTime / 10.0f); // 서서히 감속
 	Velocity *= DecelerationFactor;
 
 	AddActorWorldOffset(Velocity * DeltaTime, true);
